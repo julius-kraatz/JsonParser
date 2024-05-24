@@ -2,15 +2,20 @@
 
 namespace JsonParser
 {
+    [Serializable]
+    public class JsonParserException : Exception
+    {
+        public JsonParserException() : base() { }
+        public JsonParserException(string message) : base(message) { }
+        public JsonParserException(string message, Exception inner) : base(message, inner) { }
+    }
     internal class Value
     {
         private readonly string desc;
-        private string? error;
         public string Desc { get { return desc; } }
-        public Value(string desc, string? error = null)
+        public Value(string desc)
         {
             this.desc = desc;
-            this.error = error;
         }
     }
     internal class Member
@@ -61,7 +66,7 @@ namespace JsonParser
         private string content;
         public string Content { get { return content; } set { content = value; } }
 
-        public String(string content, string? error = null) : base("string", error)
+        public String(string content) : base("string")
         {
             this.content = content;
         }
@@ -162,6 +167,7 @@ namespace JsonParser
             tokenIndex++;
             if (!CheckToken(endIndex, Token.Description.Symbol, "}"))
             {
+                Error(endIndex, Token.Description.Symbol, "}");
                 return result;
             }
             result = new Object(ParseMembers(endIndex - 1));
@@ -176,6 +182,7 @@ namespace JsonParser
                 {
                     if(!CheckToken(tokenIndex, Token.Description.Symbol, ","))
                     {
+                        Error(tokenIndex, Token.Description.Symbol, ",");
                         break;
                     }
                     tokenIndex++;
@@ -199,11 +206,13 @@ namespace JsonParser
             String? memberName = ParseString();
             if (memberName == null)
             {
+                Error(tokenIndex, Token.Description.StringLiteral);
                 return member;
             }
             tokenIndex++;
             if (!CheckToken(tokenIndex, Token.Description.Symbol, ":"))
             {
+                Error(tokenIndex, Token.Description.Symbol, ":");
                 return member;
             }
             tokenIndex++;
@@ -229,6 +238,7 @@ namespace JsonParser
             tokenIndex++;
             if (!CheckToken(endIndex, Token.Description.Symbol, "]"))
             {
+                Error(endIndex, Token.Description.Symbol, "]");
                 return result;
             }
             result = new Array(ParseElements(endIndex - 1));
@@ -243,6 +253,7 @@ namespace JsonParser
                 {
                     if (!CheckToken(tokenIndex, Token.Description.Symbol, ","))
                     {
+                        Error(tokenIndex, Token.Description.Symbol, ",");
                         break;
                     }
                     tokenIndex++;
@@ -267,7 +278,7 @@ namespace JsonParser
             if (CheckToken(tokenIndex, Token.Description.StringLiteral))
             {
                 string? error = getJsonStringError(tokens[tokenIndex].Content);
-                result = new JsonParser.String(tokens[tokenIndex].Content, error);               
+                result = new JsonParser.String(tokens[tokenIndex].Content);               
             }
             return result;
         }
@@ -319,6 +330,11 @@ namespace JsonParser
                 result = desc == tokens[index].Desc && content == tokens[index].Content;
             }
             return result;
+        }
+        private void Error(int expectedTokenIndex, Token.Description expectedTokenDesc, string expectedTokenContent = "")
+        {
+            throw new JsonParserException("Line " + tokens[expectedTokenIndex].Line + ", Column " + tokens[expectedTokenIndex].Column + ": Expected "
+                + Enum.GetName(expectedTokenDesc) + " " + expectedTokenContent);
         }
     }
 }
