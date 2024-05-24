@@ -1,0 +1,27 @@
+{
+  "first_name": "John",
+  "is_alive": true,
+  "is_stupid": false,
+  "age": 27.4,
+  "spouse": null,
+  "address": {
+    "city": "New York",
+    "state": "NY",
+    "postal_code": "645657z"
+  },
+  "phone_numbers": [
+    {
+      "type": "home",
+      "number": "1337-001"
+    },
+    {
+      "type": "office",
+      "number": null
+    }
+  ],
+  "children": [
+    "Catherine",
+    "Thomas",
+    "Trevor"
+  ]
+}
