@@ -36,6 +36,18 @@
     <None Update="testfiles\testArrayWithMembers.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="testfiles\testNestedArrayWithArray.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="testfiles\testNestedArrayWithObject.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="testfiles\testNestedObjectWithArray.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="testfiles\testNestedObjectWithObject.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="testfiles\testObjectWithMember.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

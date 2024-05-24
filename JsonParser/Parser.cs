@@ -165,7 +165,6 @@ namespace JsonParser
                 return result;
             }
             result = new Object(ParseMembers(endIndex - 1));
-            tokenIndex++;
             return result;
         }
         private List<Member> ParseMembers(int endIndex)
@@ -233,7 +232,6 @@ namespace JsonParser
                 return result;
             }
             result = new Array(ParseElements(endIndex - 1));
-            tokenIndex++;
             return result;
         }
         private List<Element> ParseElements(int endIndex)
@@ -254,6 +252,7 @@ namespace JsonParser
                 if (elementValue != null)
                 {
                     elements.Add(new Element(elementValue));
+                    tokenIndex++;
                 }
             }
             return elements;

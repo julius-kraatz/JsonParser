@@ -223,6 +223,149 @@ namespace JsonTests
             Assert.AreEqual(1000, elementValue3.Content);
         }
         [TestMethod]
+        public void ParserCanParseNestedObjectWithObjectInside()
+        {
+            string content = File.ReadAllText("testfiles/testNestedObjectWithObject.json");
+            List<Token> tokens = new Lexer(content).Tokenize();
+            JsonParser.Object? value = new Parser(tokens).Parse() as JsonParser.Object;
+            Assert.IsNotNull(value);
+            Assert.AreEqual("object", value.Desc);
+            Assert.AreEqual(2, value.Members.Count);
+            Assert.AreEqual("Test", value.Members[0].Name);
+            Assert.AreEqual("Object", value.Members[1].Name);
+
+            JsonParser.Number? memberValue0 = value.Members[0].Value as JsonParser.Number;
+            Assert.IsNotNull(memberValue0);
+            Assert.AreEqual("number", memberValue0.Desc);
+            Assert.AreEqual(9, memberValue0.Content);
+
+            JsonParser.Object? nestedObjectValue = value.Members[1].Value as JsonParser.Object;
+            Assert.IsNotNull(nestedObjectValue);
+            Assert.AreEqual("object", nestedObjectValue.Desc);
+            Assert.AreEqual(2, nestedObjectValue.Members.Count);
+            Assert.AreEqual("Name", nestedObjectValue.Members[0].Name);
+            Assert.AreEqual("IsArtist", nestedObjectValue.Members[1].Name);
+
+            JsonParser.String? nestedObjectValue0 = nestedObjectValue.Members[0].Value as JsonParser.String;
+            Assert.IsNotNull (nestedObjectValue0);
+            Assert.AreEqual ("string", nestedObjectValue0.Desc);
+            Assert.AreEqual("Leonardo", nestedObjectValue0.Content);
+        }
+        [TestMethod]
+        public void ParserCanParseNestedObjectWithArrayInside()
+        {
+            string content = File.ReadAllText("testfiles/testNestedObjectWithArray.json");
+            List<Token> tokens = new Lexer(content).Tokenize();
+            JsonParser.Object? value = new Parser(tokens).Parse() as JsonParser.Object;
+            Assert.IsNotNull(value);
+            Assert.AreEqual("object", value.Desc);
+            Assert.AreEqual(2, value.Members.Count);
+            Assert.AreEqual("Test", value.Members[0].Name);
+            Assert.AreEqual("Array", value.Members[1].Name);
+
+            JsonParser.Number? memberValue0 = value.Members[0].Value as JsonParser.Number;
+            Assert.IsNotNull(memberValue0);
+            Assert.AreEqual("number", memberValue0.Desc);
+            Assert.AreEqual(9, memberValue0.Content);
+
+            JsonParser.Array? nestedArrayValue = value.Members[1].Value as JsonParser.Array;
+            Assert.IsNotNull(nestedArrayValue);
+            Assert.AreEqual("array", nestedArrayValue.Desc);
+            Assert.AreEqual(4, nestedArrayValue.Elements.Count);
+
+            JsonParser.Number? elementValue0 = nestedArrayValue.Elements[0].Value as JsonParser.Number;
+            Assert.IsNotNull(elementValue0);
+            Assert.AreEqual("number", elementValue0.Desc);
+            Assert.AreEqual(9.45, elementValue0.Content);
+
+            JsonParser.Number? elementValue1 = nestedArrayValue.Elements[1].Value as JsonParser.Number;
+            Assert.IsNotNull(elementValue1);
+            Assert.AreEqual("number", elementValue1.Desc);
+            Assert.AreEqual(13, elementValue1.Content);
+
+            JsonParser.Number? elementValue2 = nestedArrayValue.Elements[2].Value as JsonParser.Number;
+            Assert.IsNotNull(elementValue2);
+            Assert.AreEqual("number", elementValue2.Desc);
+            Assert.AreEqual(-67500, elementValue2.Content);
+
+            JsonParser.Number? elementValue3 = nestedArrayValue.Elements[3].Value as JsonParser.Number;
+            Assert.IsNotNull(elementValue3);
+            Assert.AreEqual("number", elementValue3.Desc);
+            Assert.AreEqual(1000, elementValue3.Content);
+        }
+        [TestMethod]
+        public void ParserCanParseNestedArrayWithArrayInside()
+        {
+            string content = File.ReadAllText("testfiles/testNestedArrayWithArray.json");
+            List<Token> tokens = new Lexer(content).Tokenize();
+            JsonParser.Array? value = new Parser(tokens).Parse() as JsonParser.Array;
+            Assert.IsNotNull(value);
+            Assert.AreEqual("array", value.Desc);
+            Assert.AreEqual(3, value.Elements.Count);
+
+            JsonParser.Number? elementValue0 = value.Elements[0].Value as JsonParser.Number;
+            Assert.IsNotNull(elementValue0);
+            Assert.AreEqual("number", elementValue0.Desc);
+            Assert.AreEqual(9.45, elementValue0.Content);
+
+            JsonParser.Array? nestedArrayValue = value.Elements[1].Value as JsonParser.Array;
+            Assert.IsNotNull(nestedArrayValue);
+            Assert.AreEqual("array", nestedArrayValue.Desc);
+            Assert.AreEqual(4, nestedArrayValue.Elements.Count);
+
+            JsonParser.Number? elementValue2 = value.Elements[2].Value as JsonParser.Number;
+            Assert.IsNotNull(elementValue2);
+            Assert.AreEqual("number", elementValue2.Desc);
+            Assert.AreEqual(13.34, elementValue2.Content);
+
+            JsonParser.Number? nestedArrayElementValue0 = nestedArrayValue.Elements[0].Value as JsonParser.Number;
+            Assert.IsNotNull(nestedArrayElementValue0);
+            Assert.AreEqual("number", nestedArrayElementValue0.Desc);
+            Assert.AreEqual(3, nestedArrayElementValue0.Content);
+
+            JsonParser.Number? nestedArrayElementValue1 = nestedArrayValue.Elements[1].Value as JsonParser.Number;
+            Assert.IsNotNull(nestedArrayElementValue1);
+            Assert.AreEqual("number", nestedArrayElementValue1.Desc);
+            Assert.AreEqual(4, nestedArrayElementValue1.Content);
+
+            JsonParser.Number? nestedArrayElementValue2 = nestedArrayValue.Elements[2].Value as JsonParser.Number;
+            Assert.IsNotNull(nestedArrayElementValue2);
+            Assert.AreEqual("number", nestedArrayElementValue2.Desc);
+            Assert.AreEqual(5, nestedArrayElementValue2.Content);
+        }
+        [TestMethod]
+        public void ParserCanParseNestedArrayWithObjectInside()
+        {
+            string content = File.ReadAllText("testfiles/testNestedArrayWithObject.json");
+            List<Token> tokens = new Lexer(content).Tokenize();
+            JsonParser.Array? value = new Parser(tokens).Parse() as JsonParser.Array;
+            Assert.IsNotNull(value);
+            Assert.AreEqual("array", value.Desc);
+            Assert.AreEqual(2, value.Elements.Count);
+
+            JsonParser.Number? elementValue0 = value.Elements[0].Value as JsonParser.Number;
+            Assert.IsNotNull(elementValue0);
+            Assert.AreEqual("number", elementValue0.Desc);
+            Assert.AreEqual(9.45, elementValue0.Content);
+
+            JsonParser.Object? nestedObjectValue = value.Elements[1].Value as JsonParser.Object;
+            Assert.IsNotNull(nestedObjectValue);
+            Assert.AreEqual("object", nestedObjectValue.Desc);
+            Assert.AreEqual(2, nestedObjectValue.Members.Count);
+            Assert.AreEqual("Number", nestedObjectValue.Members[0].Name);
+            Assert.AreEqual("Name", nestedObjectValue.Members[1].Name);
+
+            JsonParser.Number? nestedObjectMemberValue0 = nestedObjectValue.Members[0].Value as JsonParser.Number;
+            Assert.IsNotNull(nestedObjectMemberValue0);
+            Assert.AreEqual("number", nestedObjectMemberValue0.Desc);
+            Assert.AreEqual(9, nestedObjectMemberValue0.Content);
+
+            JsonParser.String? nestedObjectMemberValue1 = nestedObjectValue.Members[1].Value as JsonParser.String;
+            Assert.IsNotNull(nestedObjectMemberValue1);
+            Assert.AreEqual("string", nestedObjectMemberValue1.Desc);
+            Assert.AreEqual("Donald", nestedObjectMemberValue1.Content);
+        }
+        [TestMethod]
         public void LexerReturnsExpectedResultWithStandardInput()
         {
             string content = File.ReadAllText("testfiles/completeTest.json");
