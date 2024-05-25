@@ -119,16 +119,7 @@ namespace JsonParser
         }
         public Value? Parse()
         {
-            Value? value = null;
-            try
-            {
-                value = ParseValue();
-            }
-            catch (JsonParserEofException)
-            {
-                Console.WriteLine("Reached end of file!");
-            }
-            return value;
+            return ParseValue();
         }
         private Value? ParseValue()
         {

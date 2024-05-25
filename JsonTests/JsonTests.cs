@@ -126,12 +126,28 @@ namespace JsonTests
             Assert.AreEqual("object", value.Desc);
         }
         [TestMethod]
+        [ExpectedException(typeof(JsonParserEofException))]
+        public void ParserCannotParseEmptyUnterminatedObject()
+        {
+            List<Token> tokens = new Lexer("{").Tokenize();
+            JsonParser.Object? value = new Parser(tokens).Parse() as JsonParser.Object;
+            Assert.IsNull(value);
+        }
+        [TestMethod]
         public void ParserCanParseEmptyArray()
         {
             List<Token> tokens = new Lexer("[]").Tokenize();
             JsonParser.Array? value = new Parser(tokens).Parse() as JsonParser.Array;
             Assert.IsNotNull(value);
             Assert.AreEqual("array", value.Desc);
+        }
+        [TestMethod]
+        [ExpectedException(typeof(JsonParserEofException))]
+        public void ParserCannotParseEmptyUnterminatedArray()
+        {
+            List<Token> tokens = new Lexer("[").Tokenize();
+            JsonParser.Array? value = new Parser(tokens).Parse() as JsonParser.Array;
+            Assert.IsNull(value);
         }
         [TestMethod]
         public void ParserCanParseObjectWithMember()
@@ -366,9 +382,136 @@ namespace JsonTests
             Assert.AreEqual("Donald", nestedObjectMemberValue1.Content);
         }
         [TestMethod]
-        public void LexerReturnsExpectedResultWithStandardInput()
+        public void ParserCanParseWikipediaExample()
         {
-            string content = File.ReadAllText("testfiles/completeTest.json");
+            JsonParser.Object? value = new Parser(File.ReadAllText("testfiles/testWikipediaExample.json")).Parse() as JsonParser.Object;
+            Assert.IsNotNull(value);
+            Assert.AreEqual("object", value.Desc);
+            Assert.AreEqual(8, value.Members.Count);
+            Assert.AreEqual("first_name", value.Members[0].Name);
+            Assert.AreEqual("last_name", value.Members[1].Name);
+            Assert.AreEqual("is_alive", value.Members[2].Name);
+            Assert.AreEqual("age", value.Members[3].Name);
+            Assert.AreEqual("address", value.Members[4].Name);
+            Assert.AreEqual("phone_numbers", value.Members[5].Name);
+            Assert.AreEqual("children", value.Members[6].Name);
+            Assert.AreEqual("spouse", value.Members[7].Name);
+
+            JsonParser.String? firstName = value.Members[0].Value as JsonParser.String;
+            Assert.IsNotNull(firstName);
+            Assert.AreEqual("string", firstName.Desc);
+            Assert.AreEqual("John", firstName.Content);
+
+            JsonParser.String? lastName = value.Members[1].Value as JsonParser.String;
+            Assert.IsNotNull(lastName);
+            Assert.AreEqual("string", lastName.Desc);
+            Assert.AreEqual("Smith", lastName.Content);
+
+            JsonParser.True? isAlive = value.Members[2].Value as JsonParser.True;
+            Assert.IsNotNull(isAlive);
+            Assert.AreEqual("true", isAlive.Desc);
+
+            JsonParser.Number? age = value.Members[3].Value as JsonParser.Number;
+            Assert.IsNotNull(age);
+            Assert.AreEqual("number", age.Desc);
+            Assert.AreEqual(27, age.Content);
+
+            JsonParser.Object? address = value.Members[4].Value as JsonParser.Object;
+            Assert.IsNotNull(address);
+            Assert.AreEqual("object", address.Desc);
+            Assert.AreEqual(4, address.Members.Count);
+            Assert.AreEqual("street_address", address.Members[0].Name);
+            Assert.AreEqual("city", address.Members[1].Name);
+            Assert.AreEqual("state", address.Members[2].Name);
+            Assert.AreEqual("postal_code", address.Members[3].Name);
+
+            JsonParser.String? streetAddress = address.Members[0].Value as JsonParser.String;
+            Assert.IsNotNull(streetAddress);
+            Assert.AreEqual("string", streetAddress.Desc);
+            Assert.AreEqual("21 2nd Street", streetAddress.Content);
+
+            JsonParser.String? city = address.Members[1].Value as JsonParser.String;    
+            Assert.IsNotNull(city);
+            Assert.AreEqual("string", city.Desc);
+            Assert.AreEqual("New York", city.Content);
+
+            JsonParser.String? state = address.Members[2].Value as JsonParser.String;
+            Assert.IsNotNull(state);
+            Assert.AreEqual("string", state.Desc);
+            Assert.AreEqual("NY", state.Content);
+
+            JsonParser.String? postalCode = address.Members[3].Value as JsonParser.String;
+            Assert.IsNotNull(postalCode);
+            Assert.AreEqual("string", postalCode.Desc);
+            Assert.AreEqual("10021-3100", postalCode.Content);
+
+            JsonParser.Array? phoneNumbers = value.Members[5].Value as JsonParser.Array;    
+            Assert.IsNotNull(phoneNumbers);
+            Assert.AreEqual("array", phoneNumbers.Desc);
+            Assert.AreEqual(2, phoneNumbers.Elements.Count);
+
+            JsonParser.Object? phoneNumbersFirstObj = phoneNumbers.Elements[0].Value as JsonParser.Object;
+            Assert.IsNotNull(phoneNumbersFirstObj);
+            Assert.AreEqual("object", phoneNumbersFirstObj.Desc);
+            Assert.AreEqual(2, phoneNumbersFirstObj.Members.Count);
+            Assert.AreEqual("type", phoneNumbersFirstObj.Members[0].Name);
+            Assert.AreEqual("number", phoneNumbersFirstObj.Members[1].Name);
+
+            JsonParser.String? phoneNumbersFirstType = phoneNumbersFirstObj.Members[0].Value as JsonParser.String;
+            Assert.IsNotNull(phoneNumbersFirstType);
+            Assert.AreEqual("string", phoneNumbersFirstType.Desc);
+            Assert.AreEqual("home", phoneNumbersFirstType.Content);
+
+            JsonParser.String? phoneNumbersFirstNumber = phoneNumbersFirstObj.Members[1].Value as JsonParser.String;
+            Assert.IsNotNull(phoneNumbersFirstNumber);
+            Assert.AreEqual("string", phoneNumbersFirstNumber.Desc);
+            Assert.AreEqual("212 555-1234", phoneNumbersFirstNumber.Content);
+
+            JsonParser.Object? phoneNumbersSecondObj = phoneNumbers.Elements[1].Value as JsonParser.Object;
+            Assert.IsNotNull(phoneNumbersSecondObj);
+            Assert.AreEqual("object", phoneNumbersSecondObj.Desc);
+            Assert.AreEqual(2, phoneNumbersSecondObj.Members.Count);
+            Assert.AreEqual("type", phoneNumbersSecondObj.Members[0].Name);
+            Assert.AreEqual("number", phoneNumbersSecondObj.Members[1].Name);
+
+            JsonParser.String? phoneNumbersSecondType = phoneNumbersSecondObj.Members[0].Value as JsonParser.String;
+            Assert.IsNotNull(phoneNumbersSecondType);
+            Assert.AreEqual("string", phoneNumbersSecondType.Desc);
+            Assert.AreEqual("office", phoneNumbersSecondType.Content);
+
+            JsonParser.String? phoneNumbersSecondNumber = phoneNumbersSecondObj.Members[1].Value as JsonParser.String;
+            Assert.IsNotNull(phoneNumbersSecondNumber);
+            Assert.AreEqual("string", phoneNumbersSecondNumber.Desc);
+            Assert.AreEqual("646 555-4567", phoneNumbersSecondNumber.Content);
+
+            JsonParser.Array? children = value.Members[6].Value as JsonParser.Array;
+            Assert.IsNotNull(children);
+            Assert.AreEqual("array", children.Desc);
+            Assert.AreEqual(3, children.Elements.Count);
+
+            JsonParser.String? firstChild = children.Elements[0].Value as JsonParser.String;
+            Assert.IsNotNull(firstChild);
+            Assert.AreEqual("string", firstChild.Desc);
+            Assert.AreEqual("Catherine", firstChild.Content);
+
+            JsonParser.String? secondChild = children.Elements[1].Value as JsonParser.String;
+            Assert.IsNotNull(secondChild);
+            Assert.AreEqual("string", secondChild.Desc);
+            Assert.AreEqual("Thomas", secondChild.Content);
+
+            JsonParser.String? thirdChild = children.Elements[2].Value as JsonParser.String;
+            Assert.IsNotNull(thirdChild);
+            Assert.AreEqual("string", thirdChild.Desc);
+            Assert.AreEqual("Trevor", thirdChild.Content);
+
+            JsonParser.Null? spouse = value.Members[7].Value as JsonParser.Null;
+            Assert.IsNotNull(spouse);
+            Assert.AreEqual("null", spouse.Desc);
+        }
+        [TestMethod]
+        public void LexerReturnsExpectedResultWithModifiedWikipediaExample()
+        {
+            string content = File.ReadAllText("testfiles/testWikipediaExampleModified.json");
             List<Token> actual = new Lexer(content).Tokenize();
 
             List<Token> expected = [
