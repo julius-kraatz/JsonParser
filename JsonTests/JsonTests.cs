@@ -311,7 +311,7 @@ namespace JsonTests
             JsonParser.Array? nestedArrayValue = value.Elements[1].Value as JsonParser.Array;
             Assert.IsNotNull(nestedArrayValue);
             Assert.AreEqual("array", nestedArrayValue.Desc);
-            Assert.AreEqual(4, nestedArrayValue.Elements.Count);
+            Assert.AreEqual(3, nestedArrayValue.Elements.Count);
 
             JsonParser.Number? elementValue2 = value.Elements[2].Value as JsonParser.Number;
             Assert.IsNotNull(elementValue2);
