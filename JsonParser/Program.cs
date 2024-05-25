@@ -8,7 +8,7 @@ namespace JsonParser
         static void Main(string[] args)
         {
 #if DEBUG
-            args = new[] {"test.json" };
+            args = new[] {"test123.json" };
 #endif
             string content = File.ReadAllText(args[0]);
             Console.WriteLine(content);

@@ -108,13 +108,11 @@ namespace JsonParser
     {
         private readonly List<Token> tokens;
         private int tokenIndex;
-        private readonly int endIndex;
 
         public Parser(List<Token> tokens)
         {
             this.tokens = tokens;
             tokenIndex = 0;
-            endIndex = tokens.Count;
         }
         public Parser(string content) : this(new Lexer(content).Tokenize())
         {
