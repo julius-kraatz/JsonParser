@@ -9,6 +9,13 @@ namespace JsonParser
         public JsonParserException(string message) : base(message) { }
         public JsonParserException(string message, Exception inner) : base(message, inner) { }
     }
+    [Serializable]
+    public class JsonParserEofException : Exception
+    {
+        public JsonParserEofException() : base() { }
+        public JsonParserEofException(string message) : base(message) { }
+        public JsonParserEofException(string message, Exception inner) : base(message, inner) { }
+    }
     internal class Value
     {
         private readonly string desc;
@@ -97,36 +104,44 @@ namespace JsonParser
         public Null() : base("null") { }
     }
 
-
     internal class Parser
     {
         private readonly List<Token> tokens;
         private int tokenIndex;
+        private readonly int endIndex;
 
         public Parser(List<Token> tokens)
         {
             this.tokens = tokens;
             tokenIndex = 0;
+            endIndex = tokens.Count;
         }
-        public Parser(string content)
+        public Parser(string content) : this(new Lexer(content).Tokenize())
         {
-            this.tokens = new Lexer(content).Tokenize();
-            tokenIndex = 0;
         }
         public Value? Parse()
         {
-            return ParseValue(tokens.Count - 1);
+            Value? value = null;
+            try
+            {
+                value = ParseValue();
+            }
+            catch (JsonParserEofException)
+            {
+                Console.WriteLine("Reached end of file!");
+            }
+            return value;
         }
-        private Value? ParseValue(int endIndex)
+        private Value? ParseValue()
         {
             Value? value = null;
 
-            value = ParseObject(endIndex);
+            value = ParseObject();
             if (value != null)
             {
                 return value;
             }
-            value = ParseArray(endIndex);
+            value = ParseArray();
             if (value != null)
             {
                 return value;
@@ -158,143 +173,130 @@ namespace JsonParser
             }
             return value;
         }
-        private Object? ParseObject(int endIndex)
+        private Object? ParseObject()
         {
             Object? result = null;
-            if (tokenIndex >= endIndex)
+            if (!CheckToken(Token.Description.Symbol, "{"))
             {
                 return result;
             }
-            if (!CheckToken(tokenIndex, Token.Description.Symbol, "{"))
-            {
-                return result;
-            }
-            tokenIndex++;
-            if (!CheckToken(endIndex, Token.Description.Symbol, "}"))
-            {
-                Error(endIndex, Token.Description.Symbol, "}");
-                return result;
-            }
-            result = new Object(ParseMembers(endIndex - 1));
-            return result;
-        }
-        private List<Member> ParseMembers(int endIndex)
-        {
             List<Member> members = new List<Member>();
-            while (tokenIndex <= endIndex)
+            bool foundEnd = false;
+            while (true)
             {
+                if (CheckToken(Token.Description.Symbol, "}"))
+                {
+                    foundEnd = true;
+                    break;
+                }
                 if (members.Count > 0)
                 {
-                    if(!CheckToken(tokenIndex, Token.Description.Symbol, ","))
+                    if (!CheckToken(Token.Description.Symbol, ","))
                     {
-                        Error(tokenIndex, Token.Description.Symbol, ",");
+                        Error(Token.Description.Symbol, ",");
                         break;
                     }
-                    tokenIndex++;
                 }
-
-                Member? member = ParseMember(endIndex);
+                Member? member = ParseMember();
                 if (member != null)
                 {
                     members.Add(member);
                 }
             }
-            return members;
+            if (!foundEnd)
+            {
+                Error(Token.Description.Symbol, "}");
+                return result;
+            }
+            result = new Object(members);
+            return result;
         }
-        private Member? ParseMember(int endIndex)
+        private Member? ParseMember()
         {
             Member? member = null;
-            if (tokenIndex >= endIndex)
-            {
-                return member;
-            }
             String? memberName = ParseString();
             if (memberName == null)
             {
-                Error(tokenIndex, Token.Description.StringLiteral);
+                Error(Token.Description.StringLiteral);
                 return member;
             }
-            tokenIndex++;
-            if (!CheckToken(tokenIndex, Token.Description.Symbol, ":"))
+            if (!CheckToken(Token.Description.Symbol, ":"))
             {
-                Error(tokenIndex, Token.Description.Symbol, ":");
+                Error(Token.Description.Symbol, ":");
                 return member;
             }
-            tokenIndex++;
-            Value? memberValue = ParseValue(endIndex);
+            Value? memberValue = ParseValue();
             if (memberValue == null)
             {
                 return member;
             }
-            tokenIndex++;
             return new Member(memberName.Content, memberValue);
         }
-        private Array? ParseArray(int endIndex)
+        private Array? ParseArray()
         {
             Array? result = null;
-            if (tokenIndex >= endIndex)
+            if (!CheckToken(Token.Description.Symbol, "["))
             {
                 return result;
             }
-            if (!CheckToken(tokenIndex, Token.Description.Symbol, "["))
-            {
-                return result;
-            }
-            tokenIndex++;
-            if (!CheckToken(endIndex, Token.Description.Symbol, "]"))
-            {
-                Error(endIndex, Token.Description.Symbol, "]");
-                return result;
-            }
-            result = new Array(ParseElements(endIndex - 1));
-            return result;
-        }
-        private List<Element> ParseElements(int endIndex)
-        {
             List<Element> elements = new List<Element>();
-            while (tokenIndex <= endIndex)
+            bool foundEnd = false;
+            while (true)
             {
+                if (CheckToken(Token.Description.Symbol, "]"))
+                {
+                    foundEnd = true;
+                    break;
+                }
                 if (elements.Count > 0)
                 {
-                    if (!CheckToken(tokenIndex, Token.Description.Symbol, ","))
+                    if (!CheckToken(Token.Description.Symbol, ","))
                     {
-                        Error(tokenIndex, Token.Description.Symbol, ",");
+                        Error(Token.Description.Symbol, ",");
                         break;
                     }
-                    tokenIndex++;
                 }
-
-                Value? elementValue = ParseValue(endIndex);
+                Value? elementValue = ParseValue();
                 if (elementValue != null)
                 {
                     elements.Add(new Element(elementValue));
-                    tokenIndex++;
                 }
             }
-            return elements;
+            if (!foundEnd)
+            {
+                Error(Token.Description.Symbol, "]");
+                return result;
+            }
+            result = new Array(elements);
+            return result;
         }
         private JsonParser.String? ParseString()
         {
             JsonParser.String? result = null;
-            if (CheckToken(tokenIndex, Token.Description.StringLiteral))
+            string content = tokens[tokenIndex].Content;
+            if (CheckToken(Token.Description.StringLiteral))
             {
-                result = new JsonParser.String(tokens[tokenIndex].Content);               
+                result = new JsonParser.String(content);               
             }
             return result;
         }
         private Number? ParseNumber()
         {
+            Number? result = null;
             bool success = double.TryParse(tokens[tokenIndex].Content, NumberStyles.Any, CultureInfo.InvariantCulture, out double i);
-            if (!success)
+            if (success)
             {
-                return null;
+                if(CheckToken(Token.Description.Sequence))
+                {
+                    result = new Number(i);
+                }
             }
-            return new Number(i);
+            return result;
         }
         private True? ParseTrue()
         {
             True? result = null;
-            if (CheckToken(tokenIndex, Token.Description.Sequence, "true"))
+            if (CheckToken(Token.Description.Sequence, "true"))
             {
                 result = new True();
             }
@@ -303,7 +305,7 @@ namespace JsonParser
         private False? ParseFalse()
         {
             False? result = null;
-            if (CheckToken(tokenIndex, Token.Description.Sequence, "false"))
+            if (CheckToken(Token.Description.Sequence, "false"))
             {
                 result = new False();
             }
@@ -312,28 +314,36 @@ namespace JsonParser
         private Null? ParseNull()
         {
             Null? result = null;
-            if (CheckToken(tokenIndex, Token.Description.Sequence, "null"))
+            if (CheckToken(Token.Description.Sequence, "null"))
             {
                 result = new Null();
             }
             return result;
         }
-        private bool CheckToken(int index, Token.Description desc, string? content = null)
+        private bool CheckToken(Token.Description desc, string? content = null)
         {
+            if(tokenIndex >= tokens.Count)
+            {
+                throw new JsonParserEofException();
+            }
             bool result;
             if (content == null)
             {
-                result = desc == tokens[index].Desc;
+                result = desc == tokens[tokenIndex].Desc;
             }
             else
             {
-                result = desc == tokens[index].Desc && content == tokens[index].Content;
+                result = desc == tokens[tokenIndex].Desc && content == tokens[tokenIndex].Content;
+            }
+            if(result)
+            {
+                tokenIndex++;
             }
             return result;
         }
-        private void Error(int expectedTokenIndex, Token.Description expectedTokenDesc, string expectedTokenContent = "")
+        private void Error(Token.Description expectedTokenDesc, string expectedTokenContent = "")
         {
-            throw new JsonParserException("Line " + tokens[expectedTokenIndex].Line + ", Column " + tokens[expectedTokenIndex].Column + ": Expected "
+            throw new JsonParserException("Line " + tokens[tokenIndex].Line + ", Column " + tokens[tokenIndex].Column + ": Expected "
                 + Enum.GetName(expectedTokenDesc) + " " + expectedTokenContent);
         }
     }
