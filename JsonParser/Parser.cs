@@ -108,6 +108,11 @@ namespace JsonParser
             this.tokens = tokens;
             tokenIndex = 0;
         }
+        public Parser(string content)
+        {
+            this.tokens = new Lexer(content).Tokenize();
+            tokenIndex = 0;
+        }
         public Value? Parse()
         {
             return ParseValue(tokens.Count - 1);
@@ -268,16 +273,11 @@ namespace JsonParser
             }
             return elements;
         }
-        private string? getJsonStringError(string input)
-        {
-            return null;
-        }
         private JsonParser.String? ParseString()
         {
             JsonParser.String? result = null;
             if (CheckToken(tokenIndex, Token.Description.StringLiteral))
             {
-                string? error = getJsonStringError(tokens[tokenIndex].Content);
                 result = new JsonParser.String(tokens[tokenIndex].Content);               
             }
             return result;
