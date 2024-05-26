@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Text.Json.Serialization;
 
 namespace JsonParser
 {
@@ -19,6 +20,7 @@ namespace JsonParser
     internal class Value
     {
         private readonly string desc;
+        [JsonPropertyOrder(-1)]
         public string Desc { get { return desc; } }
         public Value(string desc)
         {

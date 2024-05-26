@@ -1,7 +1,10 @@
-﻿namespace JsonParser
+﻿using System.Text.Json.Serialization;
+
+namespace JsonParser
 {
     internal class Token(Token.Description desc, string content, int line = 0, int column = 0)
     {
+        [JsonConverter(typeof(JsonStringEnumConverter<Description>))]
         public enum Description
         {
             StringLiteral,
