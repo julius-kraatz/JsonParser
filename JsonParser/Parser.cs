@@ -125,43 +125,13 @@ namespace JsonParser
         }
         private Value? ParseValue()
         {
-            Value? value = null;
-
-            value = ParseObject();
-            if (value != null)
-            {
-                return value;
-            }
-            value = ParseArray();
-            if (value != null)
-            {
-                return value;
-            }
-            value = ParseString();
-            if (value != null)
-            {
-                return value;
-            }
-            value = ParseNumber();
-            if (value != null)
-            {
-                return value;
-            }
-            value = ParseTrue();
-            if (value != null)
-            {
-                return value;
-            }
-            value = ParseFalse();
-            if (value != null)
-            {
-                return value;
-            }
-            value = ParseNull();
-            if (value != null)
-            {
-                return value;
-            }
+            Value? value = ParseObject();
+            value ??= ParseArray();
+            value ??= ParseNumber();
+            value ??= ParseString();
+            value ??= ParseTrue();
+            value ??= ParseFalse();
+            value ??= ParseNull();
             return value;
         }
         private Object? ParseObject()
