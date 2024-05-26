@@ -17,7 +17,7 @@ namespace JsonParser
             Console.WriteLine(JsonSerializer.Serialize(tokens, options));
 
             Value? value = new Parser(tokens).Parse();
-            Console.WriteLine(JsonSerializer.Serialize<object?>(value, options));
+            Console.WriteLine(JsonSerializer.Serialize(value, options));
         }
     }
 }
