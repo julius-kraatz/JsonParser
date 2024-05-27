@@ -1,7 +1,13 @@
 # JsonParser
-A JSON parser written in C#.
+A JSON parser written in C#. It mainly consists of a Lexer and a Parser class. 
+
+The Lexer converts the input file into a list of tokens.
+
+The Parser converts the list of tokens into a JsonParser.Value, representing the top-level value of the JSON file.
+
+It is possible to pass the input file directly to the parser without having to call the Lexer manually first.
 ## Quick Example
-Below is an example program that receives a file name via command line, passes its content to the Parser and receives the output value. For debug purposes, the built-in System.Text.Json functions are used to serialize the output value to a readable syntax tree which is then written to the console.
+Below is an example program that receives a file name via command line, passes its content to the Parser and receives the output value. For debug purposes, the built-in System.Text.Json functionality is used to serialize the output value to a readable syntax tree which is then written to the console.
 ```
 using System.Text.Encodings.Web;
 using System.Text.Json;
@@ -83,4 +89,9 @@ JsonParserNoValueException is thrown whenever no JsonParser.Value could be found
 JsonParserUnterminatedException is thrown whenever an unterminated Object or Array is encountered, i.e. the end of the token list was reached before the closing bracket.
 
 
-
+### System.Text.Json.Serializer Compatibility
+The built-in System.Text.Json functionality can be used to serialize the output JsonParser.Value to a readable syntax tree. The following steps have been taken to ensure that the syntax tree is printed in the right way:
+#### ValueOutputConverter
+The ValueOutputConverter is a custom System.Text.Json.Serialization.JsonConverter. It makes sure that any JsonParser.Value is printed as object. This means that any properties of derived classes will be printed too, which is the intended outcome.
+#### Property Order
+The description of a JsonParser.Value ("Desc") has received the lowest JsonPropertyOrder to make sure that is is printed before any properties of derived classes. This helps with readability. 
