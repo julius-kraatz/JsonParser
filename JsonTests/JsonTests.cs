@@ -126,7 +126,7 @@ namespace JsonTests
             Assert.AreEqual("object", value.Desc);
         }
         [TestMethod]
-        [ExpectedException(typeof(JsonParserException))]
+        [ExpectedException(typeof(JsonParserUnterminatedException))]
         public void ParserCannotParseEmptyUnterminatedObject()
         {
             List<Token> tokens = new Lexer("{").Tokenize();
@@ -134,7 +134,7 @@ namespace JsonTests
             Assert.IsNull(value);
         }
         [TestMethod]
-        [ExpectedException(typeof(JsonParserException))]
+        [ExpectedException(typeof(JsonParserWrongTokenException))]
         public void ParserCannotParseObjectWithLastMemberNameInvalid()
         {
             string content = File.ReadAllText("testfiles/testObjectWithMembersLastNameInvalid.json");
@@ -143,7 +143,7 @@ namespace JsonTests
             Assert.IsNull(value);
         }
         [TestMethod]
-        [ExpectedException(typeof(JsonParserException))]
+        [ExpectedException(typeof(JsonParserNoValueException))]
         public void ParserCannotParseObjectWithLastMemberValueInvalid()
         {
             string content = File.ReadAllText("testfiles/testObjectWithMembersLastValueInvalid.json");
@@ -152,7 +152,7 @@ namespace JsonTests
             Assert.IsNull(value);
         }
         [TestMethod]
-        [ExpectedException(typeof(JsonParserException))]
+        [ExpectedException(typeof(JsonParserWrongTokenException))]
         public void ParserCannotParseObjectWithFirstMemberNameInvalid()
         {
             string content = File.ReadAllText("testfiles/testObjectWithMembersFirstNameInvalid.json");
@@ -161,7 +161,7 @@ namespace JsonTests
             Assert.IsNull(value);
         }
         [TestMethod]
-        [ExpectedException(typeof(JsonParserException))]
+        [ExpectedException(typeof(JsonParserNoValueException))]
         public void ParserCannotParseObjectWithFirstMemberValueInvalid()
         {
             string content = File.ReadAllText("testfiles/testObjectWithMembersFirstValueInvalid.json");
@@ -178,7 +178,7 @@ namespace JsonTests
             Assert.AreEqual("array", value.Desc);
         }
         [TestMethod]
-        [ExpectedException(typeof(JsonParserException))]
+        [ExpectedException(typeof(JsonParserUnterminatedException))]
         public void ParserCannotParseEmptyUnterminatedArray()
         {
             List<Token> tokens = new Lexer("[").Tokenize();
@@ -186,7 +186,7 @@ namespace JsonTests
             Assert.IsNull(value);
         }
         [TestMethod]
-        [ExpectedException(typeof(JsonParserException))]
+        [ExpectedException(typeof(JsonParserNoValueException))]
         public void ParserCannotParseArrayWithLastElementInvalid()
         {
             string content = File.ReadAllText("testfiles/testArrayWithMembersLastOneInvalid.json");
@@ -195,7 +195,7 @@ namespace JsonTests
             Assert.IsNull(value);
         }
         [TestMethod]
-        [ExpectedException(typeof(JsonParserException))]
+        [ExpectedException(typeof(JsonParserNoValueException))]
         public void ParserCannotParseArrayWithFirstElementInvalid()
         {
             string content = File.ReadAllText("testfiles/testArrayWithMembersFirstOneInvalid.json");
