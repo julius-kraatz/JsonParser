@@ -1,6 +1,4 @@
 ﻿using System.Globalization;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace JsonParser
 {
@@ -10,13 +8,8 @@ namespace JsonParser
         public JsonParserException() : base() { }
         public JsonParserException(string message) : base(message) { }
         public JsonParserException(string message, Exception inner) : base(message, inner) { }
-    }
-    [Serializable]
-    public class JsonParserEofException : Exception
-    {
-        public JsonParserEofException() : base() { }
-        public JsonParserEofException(string message) : base(message) { }
-        public JsonParserEofException(string message, Exception inner) : base(message, inner) { }
+        public JsonParserException(int line, int column, string expected, string found)
+            : this("Line " + line + ", Column " + column + ": Expected " + expected + ", found '" + found + "'") { }
     }
     internal class Parser
     {
@@ -66,7 +59,7 @@ namespace JsonParser
                 {
                     if (!CheckToken(Token.Description.Symbol, ","))
                     {
-                        Error(Token.Description.Symbol, ",");
+                        ErrorExpectedToken(Token.Description.Symbol, ",");
                         break;
                     }
                 }
@@ -75,10 +68,14 @@ namespace JsonParser
                 {
                     members.Add(member);
                 }
+                else
+                {
+                    ErrorExpectedJsonValue();
+                }
             }
             if (!foundEnd)
             {
-                Error(Token.Description.Symbol, "}");
+                ErrorExpectedToken(Token.Description.Symbol, "}");
                 return result;
             }
             result = new Object(members);
@@ -90,12 +87,12 @@ namespace JsonParser
             String? memberName = ParseString();
             if (memberName == null)
             {
-                Error(Token.Description.StringLiteral);
+                ErrorExpectedToken(Token.Description.StringLiteral);
                 return member;
             }
             if (!CheckToken(Token.Description.Symbol, ":"))
             {
-                Error(Token.Description.Symbol, ":");
+                ErrorExpectedToken(Token.Description.Symbol, ":");
                 return member;
             }
             Value? memberValue = ParseValue();
@@ -125,7 +122,7 @@ namespace JsonParser
                 {
                     if (!CheckToken(Token.Description.Symbol, ","))
                     {
-                        Error(Token.Description.Symbol, ",");
+                        ErrorExpectedToken(Token.Description.Symbol, ",");
                         break;
                     }
                 }
@@ -134,10 +131,15 @@ namespace JsonParser
                 {
                     elements.Add(new Element(elementValue));
                 }
+                else
+                {
+                    ErrorExpectedJsonValue();
+                }
+                    
             }
             if (!foundEnd)
             {
-                Error(Token.Description.Symbol, "]");
+                ErrorExpectedToken(Token.Description.Symbol, "]");
                 return result;
             }
             result = new Array(elements);
@@ -197,7 +199,8 @@ namespace JsonParser
         {
             if(tokenIndex >= tokens.Count)
             {
-                throw new JsonParserEofException();
+                ErrorReachedEndOfTokens();
+                return false;
             }
             bool result;
             if (content == null)
@@ -214,10 +217,19 @@ namespace JsonParser
             }
             return result;
         }
-        private void Error(Token.Description expectedTokenDesc, string expectedTokenContent = "")
+        private void ErrorExpectedToken(Token.Description expectedTokenDesc, string expectedTokenContent = "")
         {
-            throw new JsonParserException("Line " + tokens[tokenIndex].Line + ", Column " + tokens[tokenIndex].Column + ": Expected "
-                + Enum.GetName(expectedTokenDesc) + " " + expectedTokenContent);
+            throw new JsonParserException(tokens[tokenIndex].Line, tokens[tokenIndex].Column,
+                (Enum.GetName(expectedTokenDesc) ?? "") + " " + expectedTokenContent, tokens[tokenIndex].Content);
+        }
+        private void ErrorExpectedJsonValue()
+        {
+            throw new JsonParserException(tokens[tokenIndex].Line, tokens[tokenIndex].Column, "a JSON value", tokens[tokenIndex].Content);
+        }
+        private void ErrorReachedEndOfTokens()
+        {
+            throw new JsonParserException("Unterminated object or array: reached end of file at Line " + 
+                tokens[^1].Line + ", Column " + tokens[^1].Column);
         }
     }
 }

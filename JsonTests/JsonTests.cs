@@ -126,10 +126,46 @@ namespace JsonTests
             Assert.AreEqual("object", value.Desc);
         }
         [TestMethod]
-        [ExpectedException(typeof(JsonParserEofException))]
+        [ExpectedException(typeof(JsonParserException))]
         public void ParserCannotParseEmptyUnterminatedObject()
         {
             List<Token> tokens = new Lexer("{").Tokenize();
+            JsonParser.Object? value = new Parser(tokens).Parse() as JsonParser.Object;
+            Assert.IsNull(value);
+        }
+        [TestMethod]
+        [ExpectedException(typeof(JsonParserException))]
+        public void ParserCannotParseObjectWithLastMemberNameInvalid()
+        {
+            string content = File.ReadAllText("testfiles/testObjectWithMembersLastNameInvalid.json");
+            List<Token> tokens = new Lexer(content).Tokenize();
+            JsonParser.Object? value = new Parser(tokens).Parse() as JsonParser.Object;
+            Assert.IsNull(value);
+        }
+        [TestMethod]
+        [ExpectedException(typeof(JsonParserException))]
+        public void ParserCannotParseObjectWithLastMemberValueInvalid()
+        {
+            string content = File.ReadAllText("testfiles/testObjectWithMembersLastValueInvalid.json");
+            List<Token> tokens = new Lexer(content).Tokenize();
+            JsonParser.Object? value = new Parser(tokens).Parse() as JsonParser.Object;
+            Assert.IsNull(value);
+        }
+        [TestMethod]
+        [ExpectedException(typeof(JsonParserException))]
+        public void ParserCannotParseObjectWithFirstMemberNameInvalid()
+        {
+            string content = File.ReadAllText("testfiles/testObjectWithMembersFirstNameInvalid.json");
+            List<Token> tokens = new Lexer(content).Tokenize();
+            JsonParser.Object? value = new Parser(tokens).Parse() as JsonParser.Object;
+            Assert.IsNull(value);
+        }
+        [TestMethod]
+        [ExpectedException(typeof(JsonParserException))]
+        public void ParserCannotParseObjectWithFirstMemberValueInvalid()
+        {
+            string content = File.ReadAllText("testfiles/testObjectWithMembersFirstValueInvalid.json");
+            List<Token> tokens = new Lexer(content).Tokenize();
             JsonParser.Object? value = new Parser(tokens).Parse() as JsonParser.Object;
             Assert.IsNull(value);
         }
@@ -142,10 +178,28 @@ namespace JsonTests
             Assert.AreEqual("array", value.Desc);
         }
         [TestMethod]
-        [ExpectedException(typeof(JsonParserEofException))]
+        [ExpectedException(typeof(JsonParserException))]
         public void ParserCannotParseEmptyUnterminatedArray()
         {
             List<Token> tokens = new Lexer("[").Tokenize();
+            JsonParser.Array? value = new Parser(tokens).Parse() as JsonParser.Array;
+            Assert.IsNull(value);
+        }
+        [TestMethod]
+        [ExpectedException(typeof(JsonParserException))]
+        public void ParserCannotParseArrayWithLastElementInvalid()
+        {
+            string content = File.ReadAllText("testfiles/testArrayWithMembersLastOneInvalid.json");
+            List<Token> tokens = new Lexer(content).Tokenize();
+            JsonParser.Array? value = new Parser(tokens).Parse() as JsonParser.Array;
+            Assert.IsNull(value);
+        }
+        [TestMethod]
+        [ExpectedException(typeof(JsonParserException))]
+        public void ParserCannotParseArrayWithFirstElementInvalid()
+        {
+            string content = File.ReadAllText("testfiles/testArrayWithMembersFirstOneInvalid.json");
+            List<Token> tokens = new Lexer(content).Tokenize();
             JsonParser.Array? value = new Parser(tokens).Parse() as JsonParser.Array;
             Assert.IsNull(value);
         }
