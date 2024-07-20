@@ -5,7 +5,7 @@ The Lexer converts the input file into a list of tokens.
 
 The Parser converts the list of tokens into a JsonParser.Value, representing the top-level value of the JSON file.
 
-It is possible to pass the input file directly to the parser without having to call the Lexer manually first.
+It is possible to pass the input file directly to the Parser without having to call the Lexer manually first.
 ## Quick Example
 Below is an example program that receives a file name via command line, passes its content to the Parser and receives the output value. For debug purposes, the built-in System.Text.Json functionality is used to serialize the output value to a readable syntax tree which is then written to the console.
 ```
@@ -29,7 +29,7 @@ namespace JsonParserTest
 ```
 ## Lexer
 The Lexer takes in the content of a JSON file as a string. The Lexer contains a Tokenize method that converts the string into a list of tokens.
-A Token can have one of the following descriptions: StringLiteral, Sequence or Symbol.
+There are three types of tokens: StringLiteral, Sequence and Symbol. Each of these is represented by a class inheriting from the Token class.
 ### StringLiteral
 The Lexer interprets any text enclosed in quotation marks as a StringLiteral.
 ### Sequence
@@ -81,10 +81,12 @@ namespace JsonParserTest
 ```
 ### Exceptions
 JsonParserException is the base exception class of the Parser. It is never thrown directly. The following classes are derived from it:
-#### JsonParserWrongTokenException
-JsonParserWrongTokenException is thrown whenever a specific token was expected at the current position, but it was not found. This can happen if e.g. two Members of an Object are not properly separated by comma.
+#### JsonParserSymbolNotFoundException
+JsonParserSymbolNotFoundException is thrown whenever a specific symbol was expected at the current position, but it was not found. This can happen if e.g. two Members of an Object are not properly separated by comma.
+#### JsonParserMemberNameNotFoundException
+JsonParserMemberNameNotFoundException is thrown whenever the name of a Member (inside a JSON Object) could not be found.
 #### JsonParserNoValueException
-JsonParserNoValueException is thrown whenever no JsonParser.Value could be found at the current position and that is considered a problem. This can happen if e.g. there is a trailing comma in an Array. If there is sufficient information (i.e. there was a specific token expected), then JsonParserWrongTokenException is thrown instead.
+JsonParserNoValueException is thrown whenever no JsonParser.Value could be found at the current position and that is considered a problem. This can happen if e.g. there is a trailing comma in an Array.
 #### JsonParserUnterminatedException
 JsonParserUnterminatedException is thrown whenever an unterminated Object or Array is encountered, i.e. the end of the token list was reached before the closing bracket.
 
